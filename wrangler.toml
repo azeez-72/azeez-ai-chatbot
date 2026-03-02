@@ -12,3 +12,6 @@ class_name = "ChatMemory"
 [[migrations]]
 tag = "v1"
 new_classes = ["ChatMemory"]
+
+[site]
+bucket = "./public"

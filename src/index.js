@@ -14,6 +14,16 @@ export default {
       return handleChatRequest(request, env);
     }
     
+    // Handle history endpoint
+    if (url.pathname === '/api/history') {
+      return handleHistoryRequest(request, env);
+    }
+    
+    // Handle clear history endpoint
+    if (url.pathname === '/api/clear') {
+      return handleClearRequest(request, env);
+    }
+    
     return new Response('Not Found', { status: 404 });
   },
 };
@@ -65,6 +75,50 @@ async function handleChatRequest(request, env) {
 
   } catch (error) {
     console.error('Chat error:', error);
+    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+}
+
+async function handleHistoryRequest(request, env) {
+  if (request.method !== 'GET') {
+    return new Response('Method not allowed', { status: 405 });
+  }
+
+  try {
+    const memoryId = env.CHAT_MEMORY.idFromName('default-chat');
+    const memoryStub = env.CHAT_MEMORY.get(memoryId);
+    const history = await memoryStub.getHistory();
+
+    return new Response(JSON.stringify({ history }), {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error) {
+    console.error('History error:', error);
+    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+}
+
+async function handleClearRequest(request, env) {
+  if (request.method !== 'POST') {
+    return new Response('Method not allowed', { status: 405 });
+  }
+
+  try {
+    const memoryId = env.CHAT_MEMORY.idFromName('default-chat');
+    const memoryStub = env.CHAT_MEMORY.get(memoryId);
+    await memoryStub.clearHistory();
+
+    return new Response(JSON.stringify({ success: true }), {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error) {
+    console.error('Clear error:', error);
     return new Response(JSON.stringify({ error: 'Internal server error' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
