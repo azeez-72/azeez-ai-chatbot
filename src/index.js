@@ -24,6 +24,11 @@ export default {
       return handleClearRequest(request, env);
     }
     
+    // Handle session summary endpoint
+    if (url.pathname === '/api/summary') {
+      return handleSummaryRequest(request, env);
+    }
+    
     return new Response('Not Found', { status: 404 });
   },
 };
@@ -119,6 +124,28 @@ async function handleClearRequest(request, env) {
     });
   } catch (error) {
     console.error('Clear error:', error);
+    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+}
+
+async function handleSummaryRequest(request, env) {
+  if (request.method !== 'GET') {
+    return new Response('Method not allowed', { status: 405 });
+  }
+
+  try {
+    const memoryId = env.CHAT_MEMORY.idFromName('default-chat');
+    const memoryStub = env.CHAT_MEMORY.get(memoryId);
+    const summary = await memoryStub.getConversationSummary();
+
+    return new Response(JSON.stringify({ summary }), {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error) {
+    console.error('Summary error:', error);
     return new Response(JSON.stringify({ error: 'Internal server error' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
