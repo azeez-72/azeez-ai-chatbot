@@ -1,5 +1,7 @@
 import { ChatMemory } from './chat-memory';
 
+export { ChatMemory };
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -80,15 +82,15 @@ async function handleChatRequest(request, env) {
     // Get chat history from memory
     const history = await memoryStub.getHistory();
     
-    // Prepare messages for Llama 3.3
+    // Prepare messages for Llama 3
     const messages = [
       { role: 'system', content: 'You are a helpful AI assistant. Be concise and friendly.' },
       ...history,
       { role: 'user', content: message.trim() }
     ];
 
-    // Call Cloudflare Workers AI with Llama 3.3
-    const aiResponse = await env.AI.run('@cf/meta/llama-3.3-70b-instruct', {
+    // Call Cloudflare Workers AI with Llama 3
+    const aiResponse = await env.AI.run('@cf/meta/llama-3-8b-instruct', {
       messages: messages,
       max_tokens: 500,
       temperature: 0.7,

@@ -1,6 +1,6 @@
 name = "cf-ai-chatbot"
 main = "src/index.js"
-compatibility_date = "2024-01-01"
+compatibility_date = "2024-04-03"
 
 [ai]
 binding = "AI"
@@ -13,5 +13,7 @@ class_name = "ChatMemory"
 tag = "v1"
 new_classes = ["ChatMemory"]
 
-[site]
-bucket = "./public"
+# Assets configuration for Workers
+[assets]
+directory = "./public"
+binding = "ASSETS"

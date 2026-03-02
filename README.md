@@ -4,7 +4,7 @@ A simple AI-powered chatbot built on Cloudflare's platform using Workers AI, Dur
 
 ## Features
 
-- **LLM Integration**: Uses Llama 3.3 via Cloudflare Workers AI
+- **LLM Integration**: Uses Llama 3 via Cloudflare Workers AI
 - **Memory Management**: Persistent conversation history using Durable Objects
 - **Real-time Chat**: Interactive web interface with live updates
 - **Session Tracking**: Displays message count and session duration
@@ -95,7 +95,7 @@ npm run deploy
 
 ### AI Model Settings
 
-The chatbot uses Llama 3.3 with the following settings:
+The chatbot uses Llama 3 with the following settings:
 - Max tokens: 500
 - Temperature: 0.7
 - System prompt: "You are a helpful AI assistant. Be concise and friendly."
@@ -134,7 +134,7 @@ cf_ai_project/
 ### Key Technologies
 
 - **Cloudflare Workers**: Serverless compute platform
-- **Workers AI**: Llama 3.3 model hosting
+- **Workers AI**: Llama 3 model hosting
 - **Durable Objects**: Persistent storage and state management
 - **HTML/CSS/JavaScript**: Frontend interface
 

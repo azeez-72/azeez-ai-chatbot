@@ -1,5 +1,8 @@
-export class ChatMemory {
+import { DurableObject } from "cloudflare:workers";
+
+export class ChatMemory extends DurableObject {
   constructor(state, env) {
+    super(state, env);
     this.state = state;
     this.env = env;
   }
