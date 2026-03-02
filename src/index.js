@@ -35,14 +35,39 @@ export default {
 
 async function handleChatRequest(request, env) {
   if (request.method !== 'POST') {
-    return new Response('Method not allowed', { status: 405 });
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      status: 405,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 
   try {
     const { message } = await request.json();
     
+    // Validate input
     if (!message) {
       return new Response(JSON.stringify({ error: 'Message is required' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (typeof message !== 'string') {
+      return new Response(JSON.stringify({ error: 'Message must be a string' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (message.trim().length === 0) {
+      return new Response(JSON.stringify({ error: 'Message cannot be empty' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (message.length > 4000) {
+      return new Response(JSON.stringify({ error: 'Message too long (max 4000 characters)' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
       });
@@ -59,7 +84,7 @@ async function handleChatRequest(request, env) {
     const messages = [
       { role: 'system', content: 'You are a helpful AI assistant. Be concise and friendly.' },
       ...history,
-      { role: 'user', content: message }
+      { role: 'user', content: message.trim() }
     ];
 
     // Call Cloudflare Workers AI with Llama 3.3
@@ -69,10 +94,18 @@ async function handleChatRequest(request, env) {
       temperature: 0.7,
     });
 
-    const response = aiResponse.response || 'Sorry, I could not generate a response.';
+    if (!aiResponse || !aiResponse.response) {
+      throw new Error('Invalid AI response');
+    }
+
+    const response = aiResponse.response.trim();
+    
+    if (!response) {
+      throw new Error('Empty AI response');
+    }
     
     // Store conversation in memory
-    await memoryStub.addMessage(message, response);
+    await memoryStub.addMessage(message.trim(), response);
 
     return new Response(JSON.stringify({ response }), {
       headers: { 'Content-Type': 'application/json' },
@@ -80,6 +113,22 @@ async function handleChatRequest(request, env) {
 
   } catch (error) {
     console.error('Chat error:', error);
+    
+    // Handle specific error types
+    if (error instanceof SyntaxError) {
+      return new Response(JSON.stringify({ error: 'Invalid JSON in request body' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (error.message.includes('AI binding')) {
+      return new Response(JSON.stringify({ error: 'AI service unavailable' }), {
+        status: 503,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     return new Response(JSON.stringify({ error: 'Internal server error' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
@@ -89,7 +138,10 @@ async function handleChatRequest(request, env) {
 
 async function handleHistoryRequest(request, env) {
   if (request.method !== 'GET') {
-    return new Response('Method not allowed', { status: 405 });
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      status: 405,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 
   try {
@@ -102,7 +154,15 @@ async function handleHistoryRequest(request, env) {
     });
   } catch (error) {
     console.error('History error:', error);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+    
+    if (error.message.includes('Durable Object')) {
+      return new Response(JSON.stringify({ error: 'Memory service unavailable' }), {
+        status: 503,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    return new Response(JSON.stringify({ error: 'Failed to retrieve history' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     });
@@ -111,7 +171,10 @@ async function handleHistoryRequest(request, env) {
 
 async function handleClearRequest(request, env) {
   if (request.method !== 'POST') {
-    return new Response('Method not allowed', { status: 405 });
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      status: 405,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 
   try {
@@ -124,7 +187,15 @@ async function handleClearRequest(request, env) {
     });
   } catch (error) {
     console.error('Clear error:', error);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+    
+    if (error.message.includes('Durable Object')) {
+      return new Response(JSON.stringify({ error: 'Memory service unavailable' }), {
+        status: 503,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    return new Response(JSON.stringify({ error: 'Failed to clear history' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     });
@@ -133,7 +204,10 @@ async function handleClearRequest(request, env) {
 
 async function handleSummaryRequest(request, env) {
   if (request.method !== 'GET') {
-    return new Response('Method not allowed', { status: 405 });
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      status: 405,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 
   try {
@@ -146,7 +220,15 @@ async function handleSummaryRequest(request, env) {
     });
   } catch (error) {
     console.error('Summary error:', error);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+    
+    if (error.message.includes('Durable Object')) {
+      return new Response(JSON.stringify({ error: 'Memory service unavailable' }), {
+        status: 503,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    return new Response(JSON.stringify({ error: 'Failed to retrieve summary' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     });
