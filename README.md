@@ -1,6 +1,8 @@
 # AI Chatbot on Cloudflare
 
-A simple AI-powered chatbot built on Cloudflare's platform using Workers AI, Durable Objects, and Pages.
+A simple AI-powered chatbot built by Azeez Moiz Dandawala on Cloudflare's platform using Workers AI, Durable Objects, and Pages.
+
+**🚀 Live Demo**: https://azeez-ai-chatbot.azeezmoiz-dandawala.workers.dev
 
 ## Features
 
@@ -167,6 +169,12 @@ cf_ai_project/
 4. Test thoroughly
 5. Submit a pull request
 
+## Author
+
+**Built by**: Azeez Moiz Dandawala  
+**Email**: azeezmoiz.dandawala@stonybrook.edu  
+**GitHub**: https://github.com/azeez-72
+
 ## License
 
-This project is open source and available under the MIT License.
+This project is open source and available under MIT License.
