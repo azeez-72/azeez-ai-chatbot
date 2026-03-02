@@ -66,6 +66,23 @@
         #sendButton:hover {
             background: #1d4ed8;
         }
+        #clearButton {
+            padding: 10px 20px;
+            background: #dc2626;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        #clearButton:hover {
+            background: #b91c1c;
+        }
+        .session-info {
+            font-size: 12px;
+            color: #dbeafe;
+            margin-top: 5px;
+        }
         .loading {
             display: none;
             color: #666;
@@ -78,6 +95,10 @@
         <div class="chat-header">
             <h1>AI Chatbot</h1>
             <p>Powered by Cloudflare Workers AI</p>
+            <div class="session-info" id="sessionInfo">
+                <span id="messageCount">0 messages</span> • 
+                <span id="sessionDuration">0m</span>
+            </div>
         </div>
         <div class="chat-messages" id="chatMessages">
             <div class="message bot-message">
@@ -87,6 +108,7 @@
         <div class="chat-input">
             <input type="text" id="messageInput" placeholder="Type your message..." autofocus>
             <button id="sendButton">Send</button>
+            <button id="clearButton">Clear</button>
         </div>
         <div class="loading" id="loading">AI is thinking...</div>
     </div>
@@ -95,7 +117,10 @@
         const chatMessages = document.getElementById('chatMessages');
         const messageInput = document.getElementById('messageInput');
         const sendButton = document.getElementById('sendButton');
+        const clearButton = document.getElementById('clearButton');
         const loading = document.getElementById('loading');
+        const messageCount = document.getElementById('messageCount');
+        const sessionDuration = document.getElementById('sessionDuration');
 
         function addMessage(content, isUser = false) {
             const messageDiv = document.createElement('div');
@@ -103,6 +128,35 @@
             messageDiv.textContent = content;
             chatMessages.appendChild(messageDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        async function updateSessionInfo() {
+            try {
+                const response = await fetch('/api/summary');
+                if (response.ok) {
+                    const data = await response.json();
+                    messageCount.textContent = `${data.summary.message_count} messages`;
+                    sessionDuration.textContent = data.summary.session_duration;
+                }
+            } catch (error) {
+                console.error('Failed to update session info:', error);
+            }
+        }
+
+        async function clearChat() {
+            try {
+                const response = await fetch('/api/clear', { method: 'POST' });
+                if (response.ok) {
+                    chatMessages.innerHTML = `
+                        <div class="message bot-message">
+                            Chat history cleared. How can I help you today?
+                        </div>
+                    `;
+                    updateSessionInfo();
+                }
+            } catch (error) {
+                addMessage('Failed to clear chat history.');
+            }
         }
 
         async function sendMessage() {
@@ -128,6 +182,7 @@
 
                 const data = await response.json();
                 addMessage(data.response);
+                updateSessionInfo();
             } catch (error) {
                 addMessage('Sorry, I encountered an error. Please try again.');
             } finally {
@@ -136,11 +191,15 @@
         }
 
         sendButton.addEventListener('click', sendMessage);
+        clearButton.addEventListener('click', clearChat);
         messageInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 sendMessage();
             }
         });
+
+        // Initialize session info on load
+        updateSessionInfo();
     </script>
 </body>
 </html>
