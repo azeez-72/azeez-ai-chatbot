@@ -1,4 +1,4 @@
-name = "cf-ai-chatbot"
+name = "azeez-ai-chatbot"
 main = "src/index.js"
 compatibility_date = "2024-04-03"
 
@@ -12,6 +12,7 @@ class_name = "ChatMemory"
 [[migrations]]
 tag = "v1"
 new_classes = ["ChatMemory"]
+new_sqlite_classes = ["ChatMemory"]
 
 # Assets configuration for Workers
 [assets]
